@@ -1,18 +1,18 @@
-## FASTEL
+# FASTEL
 
-# Shibal Ibrahim, Hussein Hazimeh, and Rahul Mazumder
+## Shibal Ibrahim, Hussein Hazimeh, and Rahul Mazumder
 
-# Massachusetts Institute of Technology
+## Massachusetts Institute of Technology
 
-# Introduction
+## Introduction
 
 FASTEL (Flexible and Scalable Tree Ensemble Learning) is a flexible and scalable toolkit for learning tree ensembles with seamless support for new loss functions. We introduce a novel, tensor-based formulation for differentiable tree ensembles that allows for efficient training on GPUs.  We extend differentiable tree ensembles to multi-task learning settings by introducing a new regularizer that allows for soft parameter sharing across tasks. Our framework can lead to 100x more compact ensembles and up to 23% improvement in out-of-sample performance, compared to tree ensembles learnt by popular toolkits such as XGBoost. See (Ibrahim, Hazimeh and Mazumder, 2022)[https://arxiv.org/abs/2205.09717] for details.
 
-# Installation
+## Installation
 FASTEL is written in Tensorflow 2.0. It uses Tensorflow-Probability internally (for flexibility in modeling to support zero-inflation, negative binomial regression loss functions). Before installing FASTEL, please make sure that Tensorflow 2 and Tensorflow-Probability are installed.
 
 
-# Citing FASTEL
+## Citing FASTEL
 If you find this work useful in your research, please consider citing the following paper:
 @article{Ibrahim2022,
     title={Flexible Modeling and Multitask Learning using Differentiable Tree Ensembles},
