@@ -14,11 +14,14 @@ FASTEL is written in Tensorflow 2.0. It uses Tensorflow-Probability internally (
 
 ## Citing FASTEL
 If you find this work useful in your research, please consider citing the following paper:
+
+```
 @article{Ibrahim2022,
-    title={Flexible Modeling and Multitask Learning using Differentiable Tree Ensembles},
+    title={Flexible Modeling and Multitask Learning using Differentiable Tree Ensembles},    
     author={Shibal Ibrahim, Hussein Hazimeh and Rahul Mazumder},
     year={2022},
     eprint={2205.09717},
     archivePrefix={arXiv},
     primaryClass={cs.LG}
 }
+```
