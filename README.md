@@ -1,8 +1,8 @@
 # FASTEL
 
-## Shibal Ibrahim, Hussein Hazimeh, and Rahul Mazumder
+Shibal Ibrahim, Hussein Hazimeh, and Rahul Mazumder
 
-## Massachusetts Institute of Technology
+Massachusetts Institute of Technology
 
 ## Introduction
 
