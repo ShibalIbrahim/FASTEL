@@ -10,7 +10,7 @@ FASTEL (Flexible and Scalable Tree Ensemble Learning) is a flexible and scalable
 Tree Ensembles](https://arxiv.org/abs/2205.09717) for details.
 
 ## Installation
-FASTEL is written in Tensorflow 2.0. It uses Tensorflow-Probability internally (for flexibility in modeling to support zero-inflation, negative binomial regression loss functions). Before installing FASTEL, please make sure that Tensorflow 2 and Tensorflow-Probability are installed.
+FASTEL is written in Tensorflow 2.4. It uses Tensorflow-Probability (0.12) internally (for flexibility in modeling to support zero-inflation, negative binomial regression loss functions). Before installing FASTEL, please make sure that Tensorflow 2 and Tensorflow-Probability are installed.
 
 
 ## Citing FASTEL
