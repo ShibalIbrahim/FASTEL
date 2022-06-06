@@ -17,6 +17,9 @@ FASTEL is written in Tensorflow 2.4. It uses Tensorflow-Probability (0.12) inter
 import engine
 input_shape = x_train.shape[1:]
 
+# Define the Mutlitask Tree Ensemble model: here we choose 20 trees, each of depth 3.
+# num_tasks is the number of regression targets.
+# 'shared' architecture corresponds to common splits for modeling mean and mixture components in zero-inflated model and mean and dispersion components in negative binomial. 
 fastel = engine.MultiTaskTrees(
     input_shape,
     loss_criteria='zero-inflated-poisson',
