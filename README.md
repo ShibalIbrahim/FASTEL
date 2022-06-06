@@ -12,6 +12,15 @@ Tree Ensembles](https://arxiv.org/abs/2205.09717) for details.
 ## Installation
 FASTEL is written in Tensorflow 2.4. It uses Tensorflow-Probability (0.12) internally (for flexibility in modeling to support zero-inflation, negative binomial regression loss functions). Before installing FASTEL, please make sure that Tensorflow 2 and Tensorflow-Probability are installed.
 
+## Support
+The toolkit supports the following features:
+1. multitask regression
+2. missing responses
+3. zero-inflated-poisson
+4. negative binomial regression
+5. GPU training
+
+
 ## Example Usage
 ```
 import engine
