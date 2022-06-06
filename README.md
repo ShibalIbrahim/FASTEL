@@ -12,6 +12,39 @@ Tree Ensembles](https://arxiv.org/abs/2205.09717) for details.
 ## Installation
 FASTEL is written in Tensorflow 2.4. It uses Tensorflow-Probability (0.12) internally (for flexibility in modeling to support zero-inflation, negative binomial regression loss functions). Before installing FASTEL, please make sure that Tensorflow 2 and Tensorflow-Probability are installed.
 
+## Example Usage
+```
+import engine
+input_shape = x_train.shape[1:]
+
+fastel = engine.MultiTaskTrees(
+    input_shape,
+    loss_criteria='zero-inflated-poisson',
+    architecture='shared',
+    activation='sigmoid',
+    num_trees=20,
+    depth=2,
+    num_tasks=3,
+    model_type='regularized',
+    alpha=0.1,
+    power=1.0,
+    batch_size=64,
+    learning_rate=0.01,
+    epochs=200,
+)
+
+fastel.train(
+    x_train, y_train, w_train,
+    x_valid, y_valid, w_valid, 
+)
+
+metrics_valid = fastel.evaluate(x_valid, y_valid, w_valid)
+metrics_test = fastel.evaluate(x_test, y_test, w_test)
+print("============Validation Metrics =================")
+print(metrics_valid)
+print("============Test Metrics =================")
+print(metrics_test)
+```
 
 ## Citing FASTEL
 If you find this work useful in your research, please consider citing the following paper:
