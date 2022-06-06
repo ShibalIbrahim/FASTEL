@@ -19,7 +19,11 @@ input_shape = x_train.shape[1:]
 
 # Define the Mutlitask Tree Ensemble model: here we choose 20 trees, each of depth 3.
 # num_tasks is the number of regression targets.
-# 'shared' architecture corresponds to common splits for modeling mean and mixture components in zero-inflated model and mean and dispersion components in negative binomial. 
+# architecture='shared' corresponds to common splits for:
+# 1. modeling mean and mixture components in zero-inflated model
+# 2. modeling mean and dispersion components in negative binomial
+# model_type='regularized' corresponds to enforcing soft sharing by imposing closeness in split hyperparameters across tasks.
+# model_type=None enforces hard sharing of split hyperparameters across tasks.
 fastel = engine.MultiTaskTrees(
     input_shape,
     loss_criteria='zero-inflated-poisson',
