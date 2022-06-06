@@ -6,7 +6,7 @@ Massachusetts Institute of Technology
 
 ## Introduction
 
-FASTEL (Flexible and Scalable Tree Ensemble Learning) is a flexible and scalable toolkit for learning tree ensembles with seamless support for new loss functions. We introduce a novel, tensor-based formulation for differentiable tree ensembles that allows for efficient training on GPUs.  We extend differentiable tree ensembles to multi-task learning settings by introducing a new regularizer that allows for soft parameter sharing across tasks. Our framework can lead to 100x more compact ensembles and up to 23% improvement in out-of-sample performance, compared to tree ensembles learnt by popular toolkits such as XGBoost. See our paper [Flexible Modeling and Multitask Learning using Differentiable
+FASTEL (Flexible and Scalable Tree Ensemble Learning) is a flexible and scalable toolkit for learning tree ensembles. We introduce a novel, tensor-based formulation for differentiable tree ensembles that allows for efficient training on GPUs.  We extend differentiable tree ensembles to multi-task learning settings by introducing a new regularizer that allows for soft parameter sharing across tasks. Our framework can lead to 100x more compact ensembles and up to 23% improvement in out-of-sample performance, compared to tree ensembles learnt by popular toolkits such as XGBoost. See our paper [Flexible Modeling and Multitask Learning using Differentiable
 Tree Ensembles](https://arxiv.org/abs/2205.09717) appearing in 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining 2022 for details.
 
 ## Installation
