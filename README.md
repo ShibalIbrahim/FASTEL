@@ -14,7 +14,7 @@ FASTEL is written in Tensorflow 2.4. It uses Tensorflow-Probability (0.12) inter
 
 ## Support
 The toolkit supports the following features:
-1. multitask regression
+1. singletask and multitask regression
 2. missing responses
 3. zero-inflated-poisson
 4. negative binomial regression
