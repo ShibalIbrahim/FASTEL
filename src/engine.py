@@ -49,13 +49,17 @@ class MultiTaskTrees():
     ):
         self.input_shape = input_shape
         self.loss_criteria = loss_criteria
-        self.architecture = architecture
         self.activation = activation
         self.output_activation = output_activation
         self.num_trees = num_trees
         self.depth = depth
         self.num_tasks = num_tasks
-        self.model_type = model_type
+        if self.num_tasks==1: # Single-Task Learning
+            self.model_type = None
+            self.architecture = 'shared'
+        else: # Multi-Task Learning
+            self.model_type = model_type
+            self.architecture = 'shared-per-task'
         self.alpha = alpha
         self.power = power
         self.batch_size = batch_size
@@ -64,6 +68,7 @@ class MultiTaskTrees():
         self.dummy_response = dummy_response
         self.loss = losses.NegativeLogLikelihood()
         self.task_weights = np.ones(self.num_tasks)
+        
         ### Optimization parameters
         if loss_criteria in ['mse', 'poisson', 'negative-binomial']:
             optimizer = tf.keras.optimizers.Adam(self.learning_rate)
@@ -92,7 +97,7 @@ class MultiTaskTrees():
             outputs = tf.split(outputs, num_or_size_splits=self.num_tasks, axis=1)
             ypreds = []
             for i, rp in enumerate(outputs):
-                ypred = tf.keras.layers.Activation(self.output_activation)(rp)
+                ypred = tf.keras.layers.Activation('linear')(rp)
                 if loss_criteria=='mse':
                     ypred = tfp.layers.DistributionLambda(
                         lambda t: tfp.distributions.Normal(t[..., 0], scale=1.0),
@@ -106,38 +111,7 @@ class MultiTaskTrees():
                 ypreds.append(ypred)
             model = tf.keras.Model(inputs=x, outputs=ypreds)
         elif self.loss_criteria=='zero-inflated-poisson':
-            if architecture=='separate':
-                leaf_dims = (self.num_tasks, )
-                submodel = models_multitask.create_multitask_submodel(
-                    x,
-                    self.num_trees,
-                    self.depth,
-                    self.num_tasks,
-                    leaf_dims,
-                    "MultitaskRegression",
-                    model_type=self.model_type,
-                    alpha=self.alpha,
-                    power=self.power,
-                )
-                x = submodel.input
-                outputs = submodel(x)
-                regression_preds = tf.keras.layers.Activation(self.output_activation)(outputs)
-                sub_classification_model = models_multitask.create_multitask_submodel(
-                    x,
-                    self.num_trees,
-                    self.depth,
-                    self.num_tasks,
-                    leaf_dims,
-                    "MultitaskClassification",
-                    model_type=self.model_type,
-                    alpha=self.alpha,
-                    power=self.power,
-                )
-                classification_logodds = sub_classification_model(x)
-                regression_preds = tf.split(regression_preds, num_or_size_splits=self.num_tasks, axis=1)
-                classification_logodds = tf.split(classification_logodds, num_or_size_splits=self.num_tasks, axis=1)
-
-            elif architecture=='shared':
+            if architecture=='shared':
                 leaf_dims = (2*self.num_tasks, )
                 submodel = models_multitask.create_multitask_submodel(
                     x,
@@ -153,36 +127,12 @@ class MultiTaskTrees():
                 x = submodel.input
                 outputs = submodel(x)
                 regression_preds,  classification_logodds= tf.split(outputs, num_or_size_splits=2, axis=1)
-                regression_preds = tf.keras.layers.Activation(self.output_activation, name="MultitaskRegression")(regression_preds)
+                regression_preds = tf.keras.layers.Activation('linear', name="MultitaskRegression")(regression_preds)
                 classification_logodds = tf.keras.layers.Activation('linear', name="MultitaskClassification")(classification_logodds)
                 regression_preds = tf.split(regression_preds, num_or_size_splits=self.num_tasks, axis=1)
                 classification_logodds = tf.split(classification_logodds, num_or_size_splits=self.num_tasks, axis=1)
 
             elif architecture=='shared-per-task':
-                leaf_dims = (2, )
-                regression_preds = []
-                classification_logodds = []
-                for i in range(num_tasks):
-                    submodel = models_multitask.create_multitask_submodel(
-                        x,
-                        self.num_trees,
-                        self.depth,
-                        2,
-                        leaf_dims,
-                        "MultitaskRegressionClassification-task{}".format(i),
-                        model_type=self.model_type,
-                        alpha=self.alpha,                    
-                        power=self.power,
-                    )
-                    # x = submodel.input
-                    outputs = submodel(x)
-                    regression_pred,  classification_logodd= tf.split(outputs, num_or_size_splits=2, axis=1)
-                    regression_pred = tf.keras.layers.Activation(self.output_activation, name="MultitaskRegression-task{}".format(i))(regression_pred)
-                    classification_logodd = tf.keras.layers.Activation('linear', name="MultitaskClassification-task{}".format(i))(classification_logodd)
-                    regression_preds.append(regression_pred)
-                    classification_logodds.append(classification_logodd)
-
-            elif architecture=='shared-across-tasks':
                 leaf_dims = (2*self.num_tasks, )
                 submodel = models_multitask.create_multitask_submodel(
                     x,
@@ -202,7 +152,7 @@ class MultiTaskTrees():
                 classification_logodds = []
                 for i, task_pred in enumerate(task_preds):
                     regression_pred,  classification_logodd= tf.split(task_pred, num_or_size_splits=2, axis=1)
-                    regression_pred = tf.keras.layers.Activation(self.output_activation, name="MultitaskRegression-task{}".format(i))(regression_pred)
+                    regression_pred = tf.keras.layers.Activation('linear', name="MultitaskRegression-task{}".format(i))(regression_pred)
                     classification_logodd = tf.keras.layers.Activation('linear', name="MultitaskClassification-task{}".format(i))(classification_logodd)
                     regression_preds.append(regression_pred)
                     classification_logodds.append(classification_logodd)                
@@ -215,31 +165,63 @@ class MultiTaskTrees():
 
             model = tf.keras.Model(inputs=x, outputs=ypreds)
         elif self.loss_criteria in ['negative-binomial']:
-            leaf_dims = (2*self.num_tasks, )
-            submodel = models_multitask.create_multitask_submodel(
-                x,
-                self.num_trees,
-                self.depth,
-                self.num_tasks,
-                leaf_dims,
-                "MultitaskRegression",
-                model_type=self.model_type,
-                alpha=self.alpha,
-                power=self.power,
-            )
-            x = submodel.input
-            outputs = submodel(x)
-            outputs = tf.split(outputs, num_or_size_splits=self.num_tasks, axis=1)
-            ypreds = []
-            for i, rp in enumerate(outputs):
-                ypred = tf.keras.layers.Activation(self.output_activation)(rp)
-                ypred = tfp.layers.DistributionLambda(
-                    lambda t: tfp.distributions.NegativeBinomial.experimental_from_mean_dispersion(
-                        mean=tf.math.exp(t[..., 0]), dispersion=tf.math.exp(t[..., 1])
-                    ),
-                    name='task{}'.format(i)
-                )(ypred)
-                ypreds.append(ypred)
+            if self.architecture == 'shared': 
+                leaf_dims = (2*self.num_tasks, )
+                submodel = models_multitask.create_multitask_submodel(
+                    x,
+                    self.num_trees,
+                    self.depth,
+                    2*self.num_tasks,
+                    leaf_dims,
+                    "MultitaskRegressionDispersion",
+                    model_type=self.model_type,
+                    alpha=self.alpha,
+                    power=self.power,
+                )
+                x = submodel.input
+                outputs = submodel(x)
+                regression_preds,  dispersion_preds= tf.split(outputs, num_or_size_splits=2, axis=1)
+                regression_preds = tf.keras.layers.Activation('linear', name="MultitaskRegression")(regression_preds)
+                dispersion_preds = tf.keras.layers.Activation('linear', name="MultitaskDispersion")(dispersion_preds)
+                regression_preds = tf.split(regression_preds, num_or_size_splits=self.num_tasks, axis=1)
+                dispersion_preds = tf.split(dispersion_preds, num_or_size_splits=self.num_tasks, axis=1)
+                ypreds = []
+                for i, (rp, dp) in enumerate(zip(regression_preds, dispersion_preds)):
+                    ypred = tf.keras.layers.Concatenate(axis=1)([rp, dp])
+                    ypred = tfp.layers.DistributionLambda(
+                        lambda t: tfp.distributions.NegativeBinomial.experimental_from_mean_dispersion(
+                            mean=tf.math.exp(t[..., 0]), dispersion=tf.math.exp(t[..., 1])
+                        ),
+                        name='task{}'.format(i)
+                    )(ypred)
+                    ypreds.append(ypred)
+                
+            elif self.architecture == 'shared-per-task': 
+                leaf_dims = (2*self.num_tasks, )
+                submodel = models_multitask.create_multitask_submodel(
+                    x,
+                    self.num_trees,
+                    self.depth,
+                    self.num_tasks,
+                    leaf_dims,
+                    "MultitaskRegression",
+                    model_type=self.model_type,
+                    alpha=self.alpha,
+                    power=self.power,
+                )
+                x = submodel.input
+                outputs = submodel(x)
+                outputs = tf.split(outputs, num_or_size_splits=self.num_tasks, axis=1)
+                ypreds = []
+                for i, rp in enumerate(outputs):
+                    ypred = tf.keras.layers.Activation('linear')(rp)
+                    ypred = tfp.layers.DistributionLambda(
+                        lambda t: tfp.distributions.NegativeBinomial.experimental_from_mean_dispersion(
+                            mean=tf.math.exp(t[..., 0]), dispersion=tf.math.exp(t[..., 1])
+                        ),
+                        name='task{}'.format(i)
+                    )(ypred)
+                    ypreds.append(ypred)
             model = tf.keras.Model(inputs=x, outputs=ypreds)
 
         # model.summary()
